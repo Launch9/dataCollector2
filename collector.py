@@ -4,12 +4,13 @@ import requests
 import json
 import os
 import time
+from datetime import datetime
 def handle_received(*args, **kwargs):
     # Orderbook snapshot:
     if 'R' in kwargs and type(kwargs['R']) is not bool:
         # kwargs['R'] contains your snapshot
         print("Received message from: " + str(kwargs["R"]["MarketName"]))
-        saveData = {"timestamp":time.time(),"data":kwargs["R"]}
+        saveData = {"timestamp":datetime.utcnow().timestamp(),"data":kwargs["R"]}
         with open("./crypto/bittrex/orderBook/" + kwargs['R']["MarketName"] + "/" + str(kwargs["R"]["Nonce"]) + ".json",'w') as outfile:
             json.dump(saveData, outfile)
         #print(kwargs['R'])
@@ -45,24 +46,30 @@ def main():
             markets.append(i["MarketName"])
     createDirectories(markets)
     while(-1):
-        with Session() as session:
-            connection = Connection("https://socket.bittrex.com/signalr", session)
-            chat = connection.register_hub('corehub')
-            connection.received += handle_received
-            connection.error += print_error
-            connection.start()
+        try:
+            with Session() as session:
+                print("Restarting connection!")
+                connection = Connection("https://socket.bittrex.com/signalr", session)
+                chat = connection.register_hub('corehub')
+                connection.received += handle_received
+                connection.error += print_error
+                connection.start()
 
-            # You missed this part
-            chat.client.on('updateExchangeState', msg_received)
-            while(-1):
-                for market in markets:
-                    print("Querying: " + market)
-                    #chat.server.invoke('SubscribeToExchangeDeltas', market)
-                    chat.server.invoke('QueryExchangeState', market)
-                connection.wait(60)
+                # You missed this part
+                chat.client.on('updateExchangeState', msg_received)
+                for i in range(10):
+                    for market in markets:
+                        print("Querying: " + market)
+                        #chat.server.invoke('SubscribeToExchangeDeltas', market)
+                        chat.server.invoke('QueryExchangeState', market)
+                    connection.wait(60)
 
-            # Value of 1 will not work, you will get disconnected
-            connection.wait(120000)
+                # Value of 1 will not work, you will get disconnected
+                #connection.wait(120000)
+        except KeyboardInterrupt:
+            break
+        except:
+            continue
 
 
 if __name__ == "__main__":
