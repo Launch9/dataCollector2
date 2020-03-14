@@ -10,8 +10,9 @@ def handle_received(*args, **kwargs):
     if 'R' in kwargs and type(kwargs['R']) is not bool:
         # kwargs['R'] contains your snapshot
         print("Received message from: " + str(kwargs["R"]["MarketName"]))
-        saveData = {"timestamp":datetime.utcnow().timestamp(),"data":kwargs["R"]}
-        with open("./crypto/bittrex/orderBook/" + kwargs['R']["MarketName"] + "/" + str(kwargs["R"]["Nonce"]) + ".json",'w') as outfile:
+        timestamp = datetime.utcnow().timestamp()
+        saveData = {"timestamp":timestamp,"data":kwargs["R"]}
+        with open("./crypto/bittrex/orderBook/" + kwargs['R']["MarketName"] + "/" + kwargs['R']["MarketName"] + str(timestamp) + ".json",'w') as outfile:
             json.dump(saveData, outfile)
         #print(kwargs['R'])
 

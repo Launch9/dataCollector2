@@ -20,8 +20,8 @@ def reverseMarketName(market):
             secondCoin = secondCoin + i
     return secondCoin + "-" + firstCoin
 
-folder = "USDT-ETH"
-mypath = "./crypto/bittrex/orderBook/" + folder
+folder = "USD-BTC"
+mypath = "./" + folder
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 xBuy = []
 xSell = []
@@ -81,7 +81,7 @@ dfObj = dfObj.set_index(['time'])
 dfObj.to_csv("./test.csv")
 df = pd.read_csv("./test.csv")
 plt.plot(df["time"], df["close"])
-plt.scatter(so["time"],so["rate"],alpha=1.0)
-plt.scatter(bo["time"],bo["rate"], alpha=1.0)
+plt.scatter(so["time"],so["rate"],alpha=0.04)
+plt.scatter(bo["time"],bo["rate"], alpha=0.04)
 #plt.plot(candX,candY)
 plt.show()
